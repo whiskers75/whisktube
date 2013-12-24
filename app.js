@@ -36,6 +36,7 @@ var serv = http.createServer(app).listen(app.get('port'), function(){
     console.log('WhiskTube: port ' + app.get('port'));
 });
 var io = require('socket.io').listen(serv);
+io.set('log level', 1); // reduce logging
 io.sockets.on('connection', function(socket) {
     socket.on('download', function(dl) {
 	routes.dl(dl.url, socket, null);
