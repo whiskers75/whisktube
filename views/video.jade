@@ -5,7 +5,11 @@ block content
      span=decodeURIComponent(video).replace('.flv', '')
      a(class="btn btn-success pull-right" href="/") Home
   br
-  div(class="flowplayer")
+  script.
+     $(document).ready(function() {
+     $(".player").flowplayer({ swf: "/swf/5.4.6/flowplayer.swf" });
+     });
+  div(class="player")
      video
         source(type="video/flv" src="/videos/" + video)
  
