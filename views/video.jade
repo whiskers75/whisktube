@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1
+     span=decodeURIComponent(video).replace('.flv', '')
+     a(class="btn btn-success pull-right" href="/") Home
+  br
+  div(class="flowplayer")
+     video
+        source(type="video/flv" src="/videos/" + video)
+ 
