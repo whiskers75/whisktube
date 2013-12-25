@@ -11,8 +11,13 @@ exports.index = function(req, res){
 exports.video = function(req, res) {
     res.render('video', {video: req.url.split('/').pop()});
 };
-exports.dl = function(url, socket, res) {
-    var yt = ytdl(url);
+exports.dl = function(url, formt, socket, res) {
+    var yt = ytdl(url, {filter: function(format) {
+	if (formt) {
+	    return format.container == formt;
+	}
+	return format.container === 'mp4';
+    }});
     var format;
     var dataRead = 0;
     yt.on('end', function() {
@@ -21,6 +26,15 @@ exports.dl = function(url, socket, res) {
 	}
 	else {
 	    socket.emit('done');
+	}
+    });
+    yt.on('error', function(err) {
+	if (res) {
+	    res.redirect('/');
+	}
+	else {
+	    console.log(err.toString());
+	    socket.emit('error', {error: err.toString()});
 	}
     });
     yt.on('data', function(data) {
@@ -33,17 +47,16 @@ exports.dl = function(url, socket, res) {
     yt.on('info', function(info, fmt) {
         format = fmt;
 	if (socket) {
-	    socket.emit('info', info);
+	    socket.emit('info', {info: info, format: fmt});
 	}
-        yt.pipe(fs.createWriteStream(__dirname.replace('routes', '') + 'public/videos/' + info.title + '.flv'));
+        yt.pipe(fs.createWriteStream(__dirname.replace('routes', '') + 'public/videos/' + info.title + '.' + format.container));
     });
 };
 exports.get = function(req, res) {
-    exports.dl(req.body.url, null, res);
+    exports.dl(req.body.url, null, null, res);
 };
 exports.rm = function(req, res) {
     fs.unlink(__dirname.replace('routes', '') + 'public/videos/' + decodeURIComponent(req.url.split('/').pop()), function(err, result) {
-	console.log('deleting:', err, result);
 	res.redirect('/');
     });
 };

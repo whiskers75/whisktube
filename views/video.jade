@@ -2,14 +2,15 @@ extends layout
 
 block content
   h1
-     span=decodeURIComponent(video).replace('.flv', '')
+     span=decodeURIComponent(video).replace('.' + video.split('.').pop(), '') + ' '
+     span(style="font-size: 12px;" class="label label-" + ((video.split('.').pop() == 'mp4' || video.split('.').pop() == 'webm') ? 'success' : 'info'))=video.split('.').pop() 
      a(class="btn btn-success pull-right" href="/") Home
   br
   script.
      $(document).ready(function() {
      $(".player").flowplayer({ swf: "/swf/5.4.6/flowplayer.swf" });
      });
-  div(class="player")
+  div(class="player" style="cursor: default;")
      video
-        source(type="video/flv" src="/videos/" + video)
+        source(type="video/" + video.split('.').pop() src="/videos/" + video)
  

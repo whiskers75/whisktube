@@ -14,6 +14,8 @@ block content
     socket.on('connect', function () {
         ready = true;
         console.log('Connected!');
+        $('#downformat').show();
+        $('#downsubmit').css('height', '68px');
     });
     $(document).ready(function() {
     $('#downform').submit(function (event) {
@@ -21,14 +23,31 @@ block content
         if (ready) {
             console.log('yes');
             event.preventDefault();
+            if ($('#downformat').val() == '') {
+                $('#downformat').val('mp4')
+            }
             socket.emit('download', {
-                url: $('#downurl').val()
+                url: $('#downurl').val(),
+                fmt: $('#downformat').val()
             });
-            socket.on('info', function (info) {
+            $('#downtitle').html($('#downurl').val());
+            socket.on('info', function (data) {
                 $('#downform').hide();
-                $('#downtitle').html(info.title);
-                $('#downimg').attr('src', info.thumbnail_url);
+                $('#downtitle').html(data.info.title + ' <span class="label label-info">' + data.format.container + '</span>');
+                $('#downimg').attr('src', data.info.thumbnail_url);
                 $('#downinfo').show();
+            });
+            socket.on('error', function(err) {
+                $('#downform').hide();
+                $('#downinfo').show();
+                $('#downprogtxt').html(err.error);
+                $('#downtitle').css('color', '#e00');
+                $('#downprogtxt').css('color', '#e00');
+                $('#downprogress').removeClass('progress-bar-success');
+                $('#downprogress').addClass('progress-bar-danger');
+                $('#downprogress').css('width', '100%');
+                $('.progress').removeClass('progress-striped active');
+                setTimeout(function() {window.location.reload(true)}, 4500);
             });
             socket.on('progress', function (progress) {
                 $('#downprogress').css('width', progress.tidy);
@@ -42,14 +61,17 @@ block content
     });
   - each video in list
      li
-        a(href='/show/' + video)=video.replace('.flv', '')
+        a(href='/show/' + video)=video.replace('.' + video.split('.').pop(), '')
         a(href='/delete/' + video class="label label-danger pull-right") Delete
+        span(class="pull-right") &nbsp;
+        span(class="pull-right label label-" + ((video.split('.').pop() == 'mp4' || video.split('.').pop() == 'webm') ? 'success' : 'default'))=video.split('.').pop()
   h3 Download new video
      form(name="dl" id='downform' action="/download" method="POST")
         div(class="input-group")
            input(type="text" class="form-control" placeholder="Video URL" id="downurl" name="url")
+           input(type="text" class="form-control" placeholder="Format" val="mp4" id="downformat" name="fmt")
            span(class="input-group-btn")
-              button(type="submit" class="btn btn-default" action="submit") Submit
+              button(type="submit" id="downsubmit" class="btn btn-default" action="submit") Submit
      div(id="downinfo" style="display: none;")
         br
         h4
