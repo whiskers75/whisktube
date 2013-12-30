@@ -5,7 +5,11 @@ var vids = {};
 
 exports.index = function(req, res){
     fs.readdir(__dirname.replace('routes', '') + 'public/videos', function(err, videos) {
-	res.render('index', { list: videos });
+        var s = 0;
+	fs.readdirSync('public/videos').forEach(function(x) {
+	    s = fs.statSync('public/videos/' + x).size + s;
+	});
+	res.render('index', {list: videos, size: s / 1024 / 1024});
     });
 };
 exports.video = function(req, res) {
@@ -49,7 +53,7 @@ exports.dl = function(url, formt, socket, res) {
 	if (socket) {
 	    socket.emit('info', {info: info, format: fmt});
 	}
-        yt.pipe(fs.createWriteStream(__dirname.replace('routes', '') + 'public/videos/' + info.title + '.' + format.container));
+        yt.pipe(fs.createWriteStream(__dirname.replace('routes', '') + 'public/videos/' + info.title.replace('/', ' ') + '.' + format.container));
     });
 };
 exports.get = function(req, res) {

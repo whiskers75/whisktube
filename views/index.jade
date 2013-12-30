@@ -4,7 +4,7 @@ block content
   h1
      span WhiskTube 
      span(class="label label-info" style="font-size: 12px") beta
-
+     span(class="btn btn-danger pull-right" style="font-size: 14px;")='Size: ' + (size > 1000 ? (size / 1024).toFixed(2) + ' GB' : size.toFixed(2) + ' MB')
   h3 Videos
   script.
     var ready = false;
